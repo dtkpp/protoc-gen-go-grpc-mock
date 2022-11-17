@@ -1,0 +1,38 @@
+load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+# gazelle:prefix github.com/sorcererxw/protoc-gen-go-grpc-mock
+# gazelle:exclude example
+# gazelle:go_naming_convention import_alias
+gazelle(name = "gazelle")
+
+gazelle(
+    name = "update_repos",
+    args = [
+        "-from_file=go.mod",
+        "-to_macro=deps.bzl%go_dependencies",
+        "-prune",
+    ],
+    command = "update-repos",
+)
+
+go_library(
+    name = "protoc-gen-go-grpc-mock_lib",
+    srcs = [
+        "main.go",
+        "mockgen.go",
+    ],
+    importpath = "github.com/sorcererxw/protoc-gen-go-grpc-mock",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@com_github_golang_mock//mockgen/model",
+        "@org_golang_google_protobuf//compiler/protogen",
+        "@org_golang_x_tools//imports",
+    ],
+)
+
+go_binary(
+    name = "protoc-gen-go-grpc-mock",
+    embed = [":protoc-gen-go-grpc-mock_lib"],
+    visibility = ["//visibility:public"],
+)
